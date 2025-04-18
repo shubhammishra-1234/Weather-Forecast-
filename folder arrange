@@ -1,0 +1,17 @@
+weather-forecast-app/
+├── public/
+│   ├── index.html
+│   ├── loading.html
+├── components/
+│   ├── weather-card.tsx
+│   └── ...
+├── scripts/
+│   ├── weather.js
+│   ├── location.js
+├── styles/
+│   ├── tailwind.css
+│   └── ...
+├── .gitignore
+├── README.md
+├── package.json (if React/TS project)
+└── components.json
