@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Forecast - Loading</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #6ab7ff 0%, #3461ff 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            color: white;
+        }
+        
+        .loading-container {
+            text-align: center;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .title {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 1s ease forwards;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            font-weight: 300;
+            margin-bottom: 3rem;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 1s ease 0.3s forwards;
+        }
+        
+        .loader {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+        
+        .loader-circle {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin: 0 10px;
+            background-color: white;
+            animation: bounce 1.5s infinite ease-in-out;
+            opacity: 0;
+            transform: scale(0);
+        }
+        
+        .loader-circle:nth-child(1) {
+            animation-delay: 0s;
+        }
+        
+        .loader-circle:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .loader-circle:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        .loader-circle:nth-child(4) {
+            animation-delay: 0.6s;
+        }
+        
+        .loader-circle:nth-child(5) {
+            animation-delay: 0.8s;
+        }
+        
+        .progress-container {
+            width: 300px;
+            height: 6px;
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 0 auto;
+            opacity: 0;
+            animation: fadeIn 1s ease 1s forwards;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            width: 0;
+            background-color: white;
+            border-radius: 10px;
+            animation: progress 3s ease-in-out forwards;
+        }
+        
+        .weather-elements {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        
+        .cloud {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            opacity: 0;
+            animation: floatCloud 15s linear infinite, fadeIn 1s ease forwards;
+        }
+        
+        .sun {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle, #FFD700 60%, rgba(255, 215, 0, 0) 70%);
+            border-radius: 50%;
+            top: 10%;
+            right: 10%;
+            opacity: 0;
+            animation: pulse 3s ease-in-out infinite, fadeIn 1s ease forwards;
+        }
+        
+        .rain-drop {
+            position: absolute;
+            width: 2px;
+            background-color: rgba(255, 255, 255, 0.7);
+            border-radius: 0 0 5px 5px;
+            opacity: 0;
+            animation: fall 1s linear infinite, fadeIn 0.5s ease forwards;
+        }
+        
+        .snowflake {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background-color: white;
+            border-radius: 50%;
+            opacity: 0;
+            animation: snowfall 10s linear infinite, fadeIn 0.5s ease forwards;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        
+        @keyframes bounce {
+            0%, 100% {
+                transform: scale(0.3);
+                opacity: 0.3;
+            }
+            50% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes progress {
+            0% {
+                width: 0;
+            }
+            100% {
+                width: 100%;
+            }
+        }
+        
+        @keyframes floatCloud {
+            0% {
+                transform: translateX(-150px);
+            }
+            100% {
+                transform: translateX(calc(100vw + 150px));
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes fall {
+            0% {
+                transform: translateY(-100px);
+            }
+            100% {
+                transform: translateY(calc(100vh + 100px));
+            }
+        }
+        
+        @keyframes snowfall {
+            0% {
+                transform: translateY(-50px) rotate(0deg);
+            }
+            100% {
+                transform: translateY(calc(100vh + 50px)) rotate(360deg);
+            }
+        }
+        
+        .redirect-message {
+            margin-top: 2rem;
+            font-size: 0.9rem;
+            opacity: 0;
+            animation: fadeIn 1s ease 3s forwards;
+        }
+    </style>
+</head>
+<body>
+    <div class="weather-elements" id="weather-elements"></div>
+    
+    <div class="loading-container">
+        <h1 class="title">Weather Forecast</h1>
+        <p class="subtitle">Your daily weather companion</p>
+        
+        <div class="loader">
+            <div class="loader-circle"></div>
+            <div class="loader-circle"></div>
+            <div class="loader-circle"></div>
+            <div class="loader-circle"></div>
+            <div class="loader-circle"></div>
+        </div>
+        
+        <div class="progress-container">
+            <div class="progress-bar"></div>
+        </div>
+        
+        <p class="redirect-message">Loading weather data...</p>
+    </div>
+    
+    <script>
+        // Create weather elements
+        const weatherElements = document.getElementById('weather-elements');
+        
+        // Create clouds
+        for (let i = 0; i < 5; i++) {
+            const cloud = document.createElement('div');
+            cloud.className = 'cloud';
+            
+            const size = Math.random() * 150 + 100;
+            const top = Math.random() * 60;
+            const delay = Math.random() * 5;
+            
+            cloud.style.width = `${size}px`;
+            cloud.style.height = `${size * 0.6}px`;
+            cloud.style.top = `${top}%`;
+            cloud.style.left = `-150px`;
+            cloud.style.animationDelay = `${delay}s`;
+            
+            weatherElements.appendChild(cloud);
+        }
+        
+        // Create sun
+        const sun = document.createElement('div');
+        sun.className = 'sun';
+        weatherElements.appendChild(sun);
+        
+        // Create raindrops
+        for (let i = 0; i < 30; i++) {
+            const drop = document.createElement('div');
+            drop.className = 'rain-drop';
+            
+            const left = Math.random() * 100;
+            const delay = Math.random() * 2;
+            const height = Math.random() * 15 + 10;
+            const opacity = Math.random() * 0.7 + 0.3;
+            
+            drop.style.left = `${left}%`;
+            drop.style.height = `${height}px`;
+            drop.style.animationDelay = `${delay}s`;
+            drop.style.opacity = opacity;
+            
+            weatherElements.appendChild(drop);
+        }
+        
+        // Create snowflakes
+        for (let i = 0; i < 20; i++) {
+            const snowflake = document.createElement('div');
+            snowflake.className = 'snowflake';
+            
+            const left = Math.random() * 100;
+            const delay = Math.random() * 5;
+            const size = Math.random() * 5 + 3;
+            
+            snowflake.style.left = `${left}%`;
+            snowflake.style.width = `${size}px`;
+            snowflake.style.height = `${size}px`;
+            snowflake.style.animationDelay = `${delay}s`;
+            
+            weatherElements.appendChild(snowflake);
+        }
+        
+        // Redirect to main page after loading
+        setTimeout(() => {
+            window.location.href = 'index.html';
+        }, 5000); // Redirect after 5 seconds
+    </script>
+</body>
+</html>

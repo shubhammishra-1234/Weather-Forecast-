@@ -1,0 +1,1673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indian Weather Forecast System</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        /* Custom Animations */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        @keyframes scale {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+        
+        @keyframes slideIn {
+            0% { transform: translateY(20px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        .animate-bounce {
+            animation: bounce 1s infinite;
+        }
+        
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+        
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .animate-scale {
+            animation: scale 2s ease-in-out infinite;
+        }
+        
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        
+        .animate-slide-in {
+            animation: slideIn 0.5s ease-out forwards;
+        }
+        
+        .animate-shake {
+            animation: shake 0.5s ease-in-out;
+        }
+        
+        /* Rain Animation */
+        .rain-drop {
+            position: absolute;
+            width: 2px;
+            background-color: rgba(174, 194, 224, 0.5);
+            border-radius: 0 0 5px 5px;
+        }
+        
+        /* Cloud Animation */
+        .cloud {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+        }
+        
+        /* Sun Animation */
+        .sun {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, #FFD700 60%, rgba(255, 215, 0, 0) 70%);
+            border-radius: 50%;
+            top: 10%;
+            right: 10%;
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .sun-ray {
+            position: absolute;
+            background-color: #FFD700;
+            height: 3px;
+            transform-origin: 0 0;
+        }
+        
+        /* Lightning Animation */
+        .lightning {
+            position: absolute;
+            width: 3px;
+            height: 100px;
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0), #fff, rgba(255, 255, 255, 0));
+            transform: rotate(20deg);
+            opacity: 0;
+        }
+        
+        @keyframes lightning {
+            0% { opacity: 0; }
+            10% { opacity: 1; }
+            20% { opacity: 0; }
+            30% { opacity: 1; }
+            40% { opacity: 0; }
+            100% { opacity: 0; }
+        }
+        
+        /* Snow Animation */
+        .snowflake {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background-color: white;
+            border-radius: 50%;
+            opacity: 0.8;
+        }
+        
+        @keyframes snowfall {
+            0% { transform: translateY(-100px) rotate(0deg); }
+            100% { transform: translateY(calc(100vh + 100px)) rotate(360deg); }
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            border-radius: 1rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            width: 100%;
+            max-width: 28rem;
+            overflow: hidden;
+            animation: slideIn 0.3s ease-out forwards;
+        }
+        
+        .modal-header {
+            background-color: #EF4444;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-body {
+            padding: 1.5rem;
+        }
+        
+        /* Weather Card */
+        .weather-card {
+            transition: transform 0.3s, box-shadow 0.3s;
+            border-radius: 1rem;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        .weather-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        /* Location Prompt */
+        .location-prompt {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        
+        /* Alert Badge */
+        .alert-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 20px;
+            height: 20px;
+            background-color: #EF4444;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            animation: scale 2s infinite;
+        }
+        
+        /* Alert Notification */
+        .alert-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #EF4444;
+            color: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            z-index: 1001;
+            display: flex;
+            align-items: center;
+            max-width: 350px;
+            animation: slideIn 0.5s ease-out forwards;
+        }
+        
+        /* Tooltip */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            width: 120px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        /* Search Suggestions */
+        .search-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 0 0 0.5rem 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+        }
+        
+        .suggestion-item {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .suggestion-item:hover {
+            background-color: #f3f4f6;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #c5c5c5;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+        
+        /* Glass Morphism */
+        .glass {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+        
+        /* Weather Info Card */
+        .weather-info-card {
+            border-radius: 1rem;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .weather-info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Gradient Backgrounds */
+        .bg-gradient-blue {
+            background: linear-gradient(135deg, #6ab7ff 0%, #3461ff 100%);
+        }
+        
+        .bg-gradient-sunset {
+            background: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%);
+        }
+        
+        .bg-gradient-purple {
+            background: linear-gradient(135deg, #c471f5 0%, #fa71cd 100%);
+        }
+        
+        .bg-gradient-green {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+        
+        /* Weather Detail Cards */
+        .weather-detail-card {
+            border-radius: 0.75rem;
+            background: rgba(255, 255, 255, 0.7);
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+        
+        .weather-detail-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Alert Verification Badge */
+        .verified-badge {
+            display: inline-flex;
+            align-items: center;
+            background-color: #10B981;
+            color: white;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+        }
+        
+        /* Weather Forecast Chart */
+        .forecast-chart {
+            height: 200px;
+            width: 100%;
+            position: relative;
+        }
+        
+        .chart-bar {
+            position: absolute;
+            bottom: 0;
+            width: 30px;
+            background: linear-gradient(to top, #3B82F6, #93C5FD);
+            border-radius: 4px 4px 0 0;
+            transition: height 0.5s ease;
+        }
+        
+        .chart-label {
+            position: absolute;
+            bottom: -25px;
+            width: 30px;
+            text-align: center;
+            font-size: 0.75rem;
+            color: #4B5563;
+        }
+        
+        .chart-temp {
+            position: absolute;
+            top: -25px;
+            width: 30px;
+            text-align: center;
+            font-size: 0.75rem;
+            color: #4B5563;
+        }
+        
+        /* AI Assistant */
+        .ai-assistant-card {
+            border-radius: 1rem;
+            background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
+            color: white;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+        
+        .ai-assistant-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .ai-message {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            backdrop-filter: blur(5px);
+        }
+        
+        .ai-icon {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-100 via-blue-50 to-indigo-100">
+    <!-- Weather Animation Background -->
+    <div id="animation-container" class="absolute inset-0 overflow-hidden pointer-events-none"></div>
+
+    <!-- Alert Notification -->
+    <div id="alert-notification" class="alert-notification" style="display: none;">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        <div>
+            <div class="font-bold" id="alert-notification-title">Emergency Alert</div>
+            <div id="alert-notification-message">A new emergency alert has been issued for your area.</div>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header with Disaster Alert Button -->
+        <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8">
+            <div class="flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-blue-500 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+                </svg>
+                <h1 class="text-3xl font-bold text-gray-800 animate-float">Indian Weather Forecast</h1>
+            </div>
+            <div class="relative">
+                <button id="disaster-alert-btn" class="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-6 py-3 rounded-lg text-lg font-semibold shadow-lg flex items-center gap-2 transition-all hover:scale-105 hover:shadow-xl">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                    </svg>
+                    DISASTER ALERT
+                </button>
+                <div id="alert-badge" class="alert-badge" style="display: none;">0</div>
+            </div>
+        </div>
+
+        <!-- Current Location Weather -->
+        <div class="mb-8 animate-fade-in" style="animation-delay: 0.2s;">
+            <div class="weather-info-card shadow-lg overflow-hidden">
+                <div class="p-6">
+                    <!-- Location Selection Button -->
+                    <div class="flex justify-center mb-6">
+                        <button id="get-location-btn" class="bg-gradient-to-r from-blue-400 to-blue-600 hover:from-blue-500 hover:to-blue-700 text-white flex items-center gap-2 px-6 py-3 rounded-full shadow-lg transform transition-all hover:scale-105 hover:shadow-xl">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <span id="location-btn-text">Update My Location</span>
+                        </button>
+                    </div>
+
+                    <div id="weather-loading" class="flex justify-center items-center h-64" style="display: none;">
+                        <div class="w-12 h-12 border-b-2 border-blue-500 rounded-full animate-spin"></div>
+                    </div>
+
+                    <div id="weather-content">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="flex flex-col justify-center">
+                                <div class="flex items-center mb-4">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                    <h2 id="location-name" class="text-2xl font-semibold">Jharkhand</h2>
+                                    <button id="change-location-btn" class="ml-2 text-blue-500 hover:text-blue-600 p-1 rounded-md">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        </svg>
+                                        Change
+                                    </button>
+                                </div>
+                                <div class="flex items-center">
+                                    <span id="current-temp" class="text-6xl font-bold text-gray-800 animate-float">28°C</span>
+                                    <div class="ml-4">
+                                        <p id="current-condition" class="text-gray-600">Partly Cloudy</p>
+                                        <p id="feels-like" class="text-gray-500">Feels like 30°C</p>
+                                    </div>
+                                </div>
+                                <div class="mt-4">
+                                    <p id="current-date-time" class="text-sm text-gray-500">Wednesday, 16 April 2025 | 15:47</p>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="bg-blue-50 rounded-lg p-4 flex items-center transform transition-all hover:scale-105 hover:bg-blue-100">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+                                    </svg>
+                                    <div>
+                                        <p class="text-sm text-gray-500">Humidity</p>
+                                        <p id="humidity" class="font-semibold">72%</p>
+                                    </div>
+                                </div>
+                                <div class="bg-blue-50 rounded-lg p-4 flex items-center transform transition-all hover:scale-105 hover:bg-blue-100">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                                    </svg>
+                                    <div>
+                                        <p class="text-sm text-gray-500">Wind Speed</p>
+                                        <p id="wind-speed" class="font-semibold">8 km/h</p>
+                                    </div>
+                                </div>
+                                <div class="bg-blue-50 rounded-lg p-4 flex items-center transform transition-all hover:scale-105 hover:bg-blue-100">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-500 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                                    </svg>
+                                    <div>
+                                        <p class="text-sm text-gray-500">High</p>
+                                        <p id="high-temp" class="font-semibold">32°C</p>
+                                    </div>
+                                </div>
+                                <div class="bg-blue-50 rounded-lg p-4 flex items-center transform transition-all hover:scale-105 hover:bg-blue-100">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+                                    </svg>
+                                    <div>
+                                        <p class="text-sm text-gray-500">Low</p>
+                                        <p id="low-temp" class="font-semibold">24°C</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Additional Weather Details -->
+                        <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="bg-blue-50 rounded-lg p-4 flex items-center transform transition-all hover:scale-105 hover:bg-blue-100">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                                <div>
+                                    <p class="text-sm text-gray-500">Feels Like</p>
+                                    <p id="feels-like-detail" class="font-semibold">30°C</p>
+                                </div>
+                            </div>
+                            <div class="bg-blue-50 rounded-lg p-4 flex items-center transform transition-all hover:scale-105 hover:bg-blue-100">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                </svg>
+                                <div>
+                                    <p class="text-sm text-gray-500">Pressure</p>
+                                    <p id="pressure" class="font-semibold">1013 hPa</p>
+                                </div>
+                            </div>
+                            <div class="bg-blue-50 rounded-lg p-4 flex items-center transform transition-all hover:scale-105 hover:bg-blue-100">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                </svg>
+                                <div>
+                                    <p class="text-sm text-gray-500">Visibility</p>
+                                    <p id="visibility" class="font-semibold">10 km</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 5-Day Forecast -->
+                        <div class="mt-8">
+                            <h3 class="text-lg font-semibold mb-4">5-Day Forecast</h3>
+                            <div class="forecast-chart relative mb-8">
+                                <div id="forecast-bars" class="flex justify-between items-end h-full"></div>
+                            </div>
+                            <div id="forecast-cards" class="grid grid-cols-1 sm:grid-cols-5 gap-3">
+                                <!-- Forecast cards will be dynamically generated -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="no-location" class="hidden text-center py-12">
+                        <p class="text-gray-600 mb-4">No location selected</p>
+                        <button class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 mx-auto">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            Get My Location
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Health Assistant -->
+        <div class="mb-8 animate-fade-in" style="animation-delay: 0.3s;">
+            <div class="ai-assistant-card shadow-lg overflow-hidden">
+                <div class="p-6">
+                    <div class="flex items-center">
+                        <div class="ai-icon mr-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-semibold">Weather Health Assistant</h3>
+                    </div>
+                    <div class="ai-message" id="ai-health-advice">
+                        <p class="mb-2">Loading health recommendations based on current weather conditions...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Air Quality Index Section -->
+        <div class="mb-8 animate-fade-in" style="animation-delay: 0.4s;">
+            <div class="weather-info-card shadow-lg overflow-hidden">
+                <div class="p-6">
+                    <h3 class="text-lg font-semibold mb-4 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+                        </svg>
+                        Air Quality Index
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="flex items-center">
+                            <div class="w-24 h-24 rounded-full bg-green-100 flex items-center justify-center mr-4">
+                                <span id="aqi-value" class="text-3xl font-bold text-green-600">42</span>
+                            </div>
+                            <div>
+                                <h4 id="aqi-level" class="text-lg font-medium text-green-600">Good</h4>
+                                <p id="aqi-description" class="text-sm text-gray-600">Air quality is satisfactory, and air pollution poses little or no risk.</p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-blue-50 rounded-lg p-3 flex items-center">
+                                <div>
+                                    <p class="text-xs text-gray-500">PM2.5</p>
+                                    <p id="pm25" class="font-semibold">12 µg/m³</p>
+                                </div>
+                            </div>
+                            <div class="bg-blue-50 rounded-lg p-3 flex items-center">
+                                <div>
+                                    <p class="text-xs text-gray-500">PM10</p>
+                                    <p id="pm10" class="font-semibold">25 µg/m³</p>
+                                </div>
+                            </div>
+                            <div class="bg-blue-50 rounded-lg p-3 flex items-center">
+                                <div>
+                                    <p class="text-xs text-gray-500">Ozone (O₃)</p>
+                                    <p id="ozone" class="font-semibold">68 µg/m³</p>
+                                </div>
+                            </div>
+                            <div class="bg-blue-50 rounded-lg p-3 flex items-center">
+                                <div>
+                                    <p class="text-xs text-gray-500">NO₂</p>
+                                    <p id="no2" class="font-semibold">15 µg/m³</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Section -->
+        <div class="mb-8 animate-fade-in" style="animation-delay: 0.5s;">
+            <div class="relative">
+                <form id="search-form" class="flex gap-2">
+                    <div class="relative flex-1">
+                        <input id="search-input" type="text" placeholder="Search for an Indian city..." class="w-full px-4 py-3 rounded-lg bg-white bg-opacity-80 shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                        <div id="search-suggestions" class="search-suggestions"></div>
+                    </div>
+                    <button type="submit" class="bg-gradient-to-r from-blue-400 to-blue-600 hover:from-blue-500 hover:to-blue-700 text-white px-4 py-3 rounded-lg transform transition-all hover:scale-105">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Search Results -->
+        <div id="search-results" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    </div>
+
+    <!-- Disaster Alert Modal -->
+    <div id="disaster-modal" class="modal">
+        <div class="modal-content">
+            <!-- Header -->
+            <div class="modal-header bg-gradient-to-r from-red-500 to-red-600">
+                <div class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <h2 class="text-xl font-bold text-white">Official Disaster Alert System</h2>
+                </div>
+                <button id="close-modal-btn" class="text-white hover:bg-red-700 p-1 rounded-full">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Content -->
+            <div class="modal-body">
+                <div id="login-form">
+                    <div class="mb-6 text-center">
+                        <h3 class="text-xl font-semibold mb-2">Sign In to Official Disaster Alert</h3>
+                        <p class="text-gray-600">
+                            Get verified alerts about emergencies and disasters in your area
+                        </p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="space-y-2">
+                            <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                            <div class="relative">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                                <input id="email" type="email" placeholder="your@email.com" class="pl-10 w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                            <div class="relative">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                                <input id="password" type="password" placeholder="••••••••" class="pl-10 w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <input id="remember" type="checkbox" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                <label for="remember" class="text-sm text-gray-700">
+                                    Remember me
+                                </label>
+                            </div>
+                            <a href="#" class="text-sm text-blue-500 hover:text-blue-600">
+                                Forgot password?
+                            </a>
+                        </div>
+
+                        <button id="login-btn" class="w-full bg-gradient-to-r from-blue-400 to-blue-600 hover:from-blue-500 hover:to-blue-700 text-white px-4 py-2 rounded-md flex items-center justify-center transition-all hover:shadow-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                            </svg>
+                            Sign In
+                        </button>
+
+                        <div class="text-center text-sm text-gray-500">
+                            Don't have an account?
+                            <a href="#" class="text-blue-500 hover:text-blue-600">
+                                Sign up
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="logged-in-view" class="hidden">
+                    <div class="mb-6 text-center">
+                        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-float">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">You're Subscribed!</h3>
+                        <p class="text-gray-600">
+                            You will receive verified alerts for any disasters or emergencies in your area.
+                        </p>
+                    </div>
+
+                    <!-- Active Alerts Section -->
+                    <div class="bg-gray-100 p-4 rounded-lg mb-6">
+                        <h4 class="font-medium mb-2">Current Alert Status</h4>
+                        <div id="active-alerts">
+                            <p id="no-alerts-message" class="text-green-600 flex items-center">
+                                <span class="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
+                                No active alerts in your area
+                            </p>
+                            <div id="alerts-list" class="space-y-3 mt-3 hidden">
+                                <!-- Alert items will be added here dynamically -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Alert History Section -->
+                    <div class="mb-6">
+                        <h4 class="font-medium mb-2">Alert History</h4>
+                        <div id="alert-history" class="space-y-2 max-h-40 overflow-y-auto">
+                            <!-- Will be populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Alert Settings -->
+                    <div class="mb-6">
+                        <h4 class="font-medium mb-2">Alert Settings</h4>
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between">
+                                <label for="enable-notifications" class="text-sm text-gray-700">Enable Notifications</label>
+                                <input id="enable-notifications" type="checkbox" checked class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <label for="alert-sound" class="text-sm text-gray-700">Alert Sound</label>
+                                <input id="alert-sound" type="checkbox" checked class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <label for="alert-radius" class="text-sm text-gray-700">Alert Radius</label>
+                                <select id="alert-radius" class="text-sm border-gray-300 rounded">
+                                    <option value="5">5 km</option>
+                                    <option value="10" selected>10 km</option>
+                                    <option value="25">25 km</option>
+                                    <option value="50">50 km</option>
+                                </select>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <label for="alert-types" class="text-sm text-gray-700">Alert Types</label>
+                                <select id="alert-types" class="text-sm border-gray-300 rounded">
+                                    <option value="all" selected>All Alerts</option>
+                                    <option value="severe">Severe Only</option>
+                                    <option value="moderate">Moderate & Severe</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between">
+                        <button id="logout-btn" class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">
+                            Sign Out
+                        </button>
+                        <button id="close-alert-btn" class="bg-gradient-to-r from-blue-400 to-blue-600 hover:from-blue-500 hover:to-blue-700 text-white px-4 py-2 rounded-md transition-colors">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Location Prompt -->
+    <div id="location-prompt" class="location-prompt">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-md animate-fade-in">
+            <div class="p-4 border-b flex items-center justify-between">
+                <h3 class="text-xl font-semibold">Location Access</h3>
+                <button id="close-prompt-btn" class="text-gray-500 hover:text-gray-700 p-1 rounded-full">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div class="p-6">
+                <p class="text-gray-600 mb-4">We need your location to provide accurate weather information</p>
+                
+                <div class="bg-blue-50 p-4 rounded-lg flex items-start mb-6">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500 mr-3 mt-1 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <p class="text-sm text-gray-600">
+                        We've detected you're in a new location. Would you like to update your weather information?
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 gap-4">
+                    <button id="use-location-btn" class="bg-gradient-to-r from-blue-400 to-blue-600 hover:from-blue-500 hover:to-blue-700 text-white flex items-center justify-center gap-2 h-16 rounded-lg transition-all hover:shadow-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        Use my current location
+                    </button>
+
+                    <button id="manual-location-btn" class="border border-gray-300 hover:bg-gray-50 flex items-center justify-center gap-2 h-12 rounded-lg transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        Enter location manually
+                    </button>
+                </div>
+            </div>
+            <div class="border-t p-4 text-center">
+                <p class="text-xs text-gray-500">
+                    Your location data is only used to provide weather information and is never shared with third parties.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const disasterAlertBtn = document.getElementById('disaster-alert-btn');
+        const disasterModal = document.getElementById('disaster-modal');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const loginBtn = document.getElementById('login-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const closeAlertBtn = document.getElementById('close-alert-btn');
+        const loginForm = document.getElementById('login-form');
+        const loggedInView = document.getElementById('logged-in-view');
+        const getLocationBtn = document.getElementById('get-location-btn');
+        const locationBtnText = document.getElementById('location-btn-text');
+        const weatherLoading = document.getElementById('weather-loading');
+        const weatherContent = document.getElementById('weather-content');
+        const noLocation = document.getElementById('no-location');
+        const locationName = document.getElementById('location-name');
+        const currentTemp = document.getElementById('current-temp');
+        const currentCondition = document.getElementById('current-condition');
+        const feelsLike = document.getElementById('feels-like');
+        const feelsLikeDetail = document.getElementById('feels-like-detail');
+        const humidity = document.getElementById('humidity');
+        const windSpeed = document.getElementById('wind-speed');
+        const highTemp = document.getElementById('high-temp');
+        const lowTemp = document.getElementById('low-temp');
+        const pressure = document.getElementById('pressure');
+        const visibility = document.getElementById('visibility');
+        const currentDateTime = document.getElementById('current-date-time');
+        const changeLocationBtn = document.getElementById('change-location-btn');
+        const searchForm = document.getElementById('search-form');
+        const searchInput = document.getElementById('search-input');
+        const searchResults = document.getElementById('search-results');
+        const searchSuggestions = document.getElementById('search-suggestions');
+        const locationPrompt = document.getElementById('location-prompt');
+        const closePromptBtn = document.getElementById('close-prompt-btn');
+        const useLocationBtn = document.getElementById('use-location-btn');
+        const manualLocationBtn = document.getElementById('manual-location-btn');
+        const animationContainer = document.getElementById('animation-container');
+        const alertBadge = document.getElementById('alert-badge');
+        const alertNotification = document.getElementById('alert-notification');
+        const alertNotificationTitle = document.getElementById('alert-notification-title');
+        const alertNotificationMessage = document.getElementById('alert-notification-message');
+        const noAlertsMessage = document.getElementById('no-alerts-message');
+        const alertsList = document.getElementById('alerts-list');
+        const alertHistory = document.getElementById('alert-history');
+        const enableNotifications = document.getElementById('enable-notifications');
+        const alertSound = document.getElementById('alert-sound');
+        const alertTypes = document.getElementById('alert-types');
+        const forecastBars = document.getElementById('forecast-bars');
+        const forecastCards = document.getElementById('forecast-cards');
+        const aqiValue = document.getElementById('aqi-value');
+        const aqiLevel = document.getElementById('aqi-level');
+        const aqiDescription = document.getElementById('aqi-description');
+        const pm25 = document.getElementById('pm25');
+        const pm10 = document.getElementById('pm10');
+        const ozone = document.getElementById('ozone');
+        const no2 = document.getElementById('no2');
+        const aiHealthAdvice = document.getElementById('ai-health-advice');
+
+        // Weather conditions
+        const weatherConditions = ['sunny', 'cloudy', 'rainy', 'stormy', 'snowy'];
+        let currentWeatherCondition = 'sunny';
+
+        // State
+        let isLoggedIn = false;
+        let isLoading = false; // Set to false by default to avoid loading spinner
+        let currentLocation = "Jharkhand"; // Set default location to Jharkhand
+        let alertCount = 0;
+        let activeAlerts = [];
+        let alertHistoryItems = [];
+        let forecastData = []; // Store 5-day forecast data
+        let currentAQI = 0; // Store current AQI value
+        let currentWeatherData = {}; // Store current weather data
+
+        // Sample location database for autocomplete - Indian cities and states
+        const locationDatabase = [
+            "Jharkhand", "Ranchi", "Jamshedpur", "Dhanbad", "Bokaro", "Hazaribagh", "Deoghar", "Giridih", "Ramgarh",
+            "Bihar", "Patna", "Gaya", "Muzaffarpur", "Bhagalpur", "Darbhanga", "Purnia", "Arrah", "Begusarai",
+            "West Bengal", "Kolkata", "Howrah", "Durgapur", "Asansol", "Siliguri", "Bar  "Begusarai",
+            "West Bengal", "Kolkata", "Howrah", "Durgapur", "Asansol", "Siliguri", "Bardhaman", "Malda", "Kharagpur",
+            "Uttar Pradesh", "Lucknow", "Kanpur", "Varanasi", "Agra", "Prayagraj", "Meerut", "Bareilly", "Aligarh",
+            "Delhi", "New Delhi", "Mumbai", "Chennai", "Bangalore", "Hyderabad", "Ahmedabad", "Pune", "Surat",
+            "Odisha", "Bhubaneswar", "Cuttack", "Rourkela", "Sambalpur", "Puri", "Balasore", "Berhampur", "Jeypore",
+            "Madhya Pradesh", "Bhopal", "Indore", "Jabalpur", "Gwalior", "Ujjain", "Sagar", "Dewas", "Satna",
+            "Gujarat", "Ahmedabad", "Surat", "Vadodara", "Rajkot", "Gandhinagar", "Jamnagar", "Bhavnagar", "Junagadh",
+            "Rajasthan", "Jaipur", "Jodhpur", "Udaipur", "Kota", "Bikaner", "Ajmer", "Alwar", "Bhilwara",
+            "Punjab", "Chandigarh", "Ludhiana", "Amritsar", "Jalandhar", "Patiala", "Bathinda", "Mohali", "Pathankot",
+            "Haryana", "Gurugram", "Faridabad", "Panipat", "Ambala", "Karnal", "Hisar", "Rohtak", "Sonipat",
+            "Assam", "Guwahati", "Silchar", "Dibrugarh", "Jorhat", "Nagaon", "Tinsukia", "Tezpur", "Karimganj",
+            "Karnataka", "Mysore", "Mangalore", "Hubli", "Belgaum", "Gulbarga", "Shimoga", "Davanagere", "Udupi",
+            "Kerala", "Thiruvananthapuram", "Kochi", "Kozhikode", "Thrissur", "Kollam", "Palakkad", "Alappuzha", "Kannur",
+            "Tamil Nadu", "Coimbatore", "Madurai", "Tiruchirappalli", "Salem", "Tirunelveli", "Vellore", "Erode", "Thoothukkudi",
+            "Andhra Pradesh", "Visakhapatnam", "Vijayawada", "Guntur", "Nellore", "Kurnool", "Rajahmundry", "Tirupati", "Kakinada",
+            "Telangana", "Warangal", "Nizamabad", "Karimnagar", "Khammam", "Ramagundam", "Mahbubnagar", "Nalgonda", "Adilabad",
+            "Maharashtra", "Pune", "Nagpur", "Thane", "Nashik", "Aurangabad", "Solapur", "Amravati", "Kolhapur",
+            "Chhattisgarh", "Raipur", "Bhilai", "Bilaspur", "Korba", "Durg", "Rajnandgaon", "Raigarh", "Jagdalpur",
+            "Uttarakhand", "Dehradun", "Haridwar", "Roorkee", "Haldwani", "Rudrapur", "Kashipur", "Rishikesh", "Pithoragarh",
+            "Himachal Pradesh", "Shimla", "Mandi", "Solan", "Dharamshala", "Kullu", "Hamirpur", "Una", "Nahan",
+            "Jammu and Kashmir", "Srinagar", "Jammu", "Anantnag", "Baramulla", "Udhampur", "Kathua", "Sopore", "Poonch",
+            "Goa", "Panaji", "Margao", "Vasco da Gama", "Mapusa", "Ponda", "Cuncolim", "Curchorem", "Sanguem"
+        ];
+
+        // Official disaster alerts database - verified alerts
+        const officialDisasterAlertTypes = [
+            { 
+                type: 'Flood Warning', 
+                description: 'IMD: Flash flooding possible in low-lying areas of Eastern Jharkhand. Take necessary precautions.', 
+                severity: 'high', 
+                icon: '💧',
+                source: 'Indian Meteorological Department',
+                verified: true
+            },
+            { 
+                type: 'Severe Thunderstorm', 
+                description: 'NDMA: Strong winds and lightning expected in Northern regions. Stay indoors and avoid open areas.', 
+                severity: 'medium', 
+                icon: '⛈️',
+                source: 'National Disaster Management Authority',
+                verified: true
+            },
+            { 
+                type: 'Cyclone Alert', 
+                description: 'IMD: Cyclonic formation observed in Bay of Bengal. Coastal areas should prepare for heavy rainfall.', 
+                severity: 'critical', 
+                icon: '🌀',
+                source: 'Indian Meteorological Department',
+                verified: true
+            },
+            { 
+                type: 'Extreme Heat Warning', 
+                description: 'IMD: Temperatures exceeding 45°C expected in coming days. Stay hydrated and avoid outdoor activities.', 
+                severity: 'high', 
+                icon: '🔥',
+                source: 'Indian Meteorological Department',
+                verified: true
+            },
+            { 
+                type: 'Heavy Rainfall Alert', 
+                description: 'NDMA: Very heavy rainfall predicted. Risk of urban flooding and waterlogging in low-lying areas.', 
+                severity: 'medium', 
+                icon: '🌧️',
+                source: 'National Disaster Management Authority',
+                verified: true
+            },
+            { 
+                type: 'Earthquake Information', 
+                description: 'NCS: Magnitude 4.2 earthquake detected. No major damage reported. Stay alert for aftershocks.', 
+                severity: 'medium', 
+                icon: '🏚️',
+                source: 'National Center for Seismology',
+                verified: true
+            },
+            { 
+                type: 'Landslide Warning', 
+                description: 'GSI: High risk of landslides in hilly regions due to continuous rainfall. Avoid travel on affected routes.', 
+                severity: 'high', 
+                icon: '⛰️',
+                source: 'Geological Survey of India',
+                verified: true
+            },
+            { 
+                type: 'Air Quality Alert', 
+                description: 'CPCB: Unhealthy air quality levels detected. People with respiratory conditions should take precautions.', 
+                severity: 'medium', 
+                icon: '😷',
+                source: 'Central Pollution Control Board',
+                verified: true
+            },
+            { 
+                type: 'Forest Fire Alert', 
+                description: 'FSI: Active forest fires detected in protected areas. Nearby communities should be prepared for evacuation.', 
+                severity: 'high', 
+                icon: '🔥',
+                source: 'Forest Survey of India',
+                verified: true
+            },
+            { 
+                type: 'Dam Release Notice', 
+                description: 'CWC: Controlled water release from dam scheduled. Residents in downstream areas advised to stay alert.', 
+                severity: 'medium', 
+                icon: '🌊',
+                source: 'Central Water Commission',
+                verified: true
+            }
+        ];
+
+        // Weather icons mapping
+        const weatherIcons = {
+            'Sunny': '<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mx-auto text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>',
+            'Partly Cloudy': '<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mx-auto text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" /></svg>',
+            'Cloudy': '<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mx-auto text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" /></svg>',
+            'Rainy': '<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mx-auto text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L8 15h4v7l5-12h-4z" /></svg>',
+            'Stormy': '<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mx-auto text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L8 15h4v7l5-12h-4z" /></svg>',
+            'Snowy': '<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mx-auto text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>'
+        };
+
+        // Health advice based on weather and air quality
+        const healthAdvice = {
+            hot: [
+                "Stay hydrated by drinking plenty of water throughout the day.",
+                "Wear lightweight, light-colored, loose-fitting clothing.",
+                "Apply sunscreen with SPF 30 or higher 30 minutes before going outside.",
+                "Limit outdoor activities during peak sun hours (10 AM - 4 PM).",
+                "Seek shade when outdoors and take regular breaks in cool areas."
+            ],
+            cold: [
+                "Dress in layers to stay warm and dry.",
+                "Cover your head, hands, and feet properly as they lose heat quickly.",
+                "Stay hydrated with warm beverages.",
+                "Moisturize your skin to prevent dryness and cracking.",
+                "Be cautious of icy surfaces to prevent slips and falls."
+            ],
+            rainy: [
+                "Carry an umbrella and wear waterproof footwear.",
+                "Avoid walking through flooded areas, especially with open wounds.",
+                "Be cautious of slippery surfaces and reduced visibility while driving.",
+                "Keep electronic devices protected from water damage.",
+                "Ensure proper ventilation at home to prevent mold growth due to humidity."
+            ],
+            poorAirQuality: [
+                "Wear a N95/N99 mask when outdoors to filter air pollutants.",
+                "Limit outdoor physical activities, especially during peak pollution hours.",
+                "Keep windows and doors closed to prevent outdoor pollutants from entering.",
+                "Use air purifiers indoors if available.",
+                "Stay well-hydrated to help your body clear toxins."
+            ],
+            moderate: [
+                "It's a good day for outdoor activities, but still apply sunscreen.",
+                "Stay hydrated throughout the day.",
+                "Wear comfortable clothing suitable for the temperature.",
+                "Check weather updates for any sudden changes.",
+                "Enjoy the pleasant weather responsibly!"
+            ]
+        };
+
+        // Event Listeners
+        disasterAlertBtn.addEventListener('click', () => {
+            disasterModal.style.display = 'flex';
+            
+            // Reset alert badge when opening the modal
+            if (isLoggedIn) {
+                alertCount = 0;
+                updateAlertBadge();
+            }
+        });
+
+        closeModalBtn.addEventListener('click', () => {
+            disasterModal.style.display = 'none';
+        });
+
+        closeAlertBtn.addEventListener('click', () => {
+            disasterModal.style.display = 'none';
+        });
+
+        loginBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            
+            // Validate form
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            if (!email || !password) {
+                shakeElement(loginBtn);
+                return;
+            }
+            
+            // Simulate login
+            loginBtn.innerHTML = '<div class="w-4 h-4 border-b-2 border-white rounded-full animate-spin mr-2"></div> Signing in...';
+            
+            setTimeout(() => {
+                isLoggedIn = true;
+                loginForm.style.display = 'none';
+                loggedInView.style.display = 'block';
+                
+                // Initialize alerts after login
+                initializeAlerts();
+                
+                // Schedule periodic alerts
+                scheduleRandomAlerts();
+            }, 1500);
+        });
+
+        logoutBtn.addEventListener('click', () => {
+            isLoggedIn = false;
+            loginForm.style.display = 'block';
+            loggedInView.style.display = 'none';
+            
+            // Clear alerts when logging out
+            activeAlerts = [];
+            alertHistoryItems = [];
+            alertCount = 0;
+            updateAlertBadge();
+            updateActiveAlerts();
+            updateAlertHistory();
+        });
+
+        getLocationBtn.addEventListener('click', getCurrentLocation);
+        changeLocationBtn.addEventListener('click', showLocationPrompt);
+        closePromptBtn.addEventListener('click', () => {
+            locationPrompt.style.display = 'none';
+        });
+
+        useLocationBtn.addEventListener('click', () => {
+            locationPrompt.style.display = 'none';
+            getCurrentLocation();
+        });
+
+        manualLocationBtn.addEventListener('click', () => {
+            locationPrompt.style.display = 'none';
+            searchInput.focus();
+        });
+
+        // Search input with autocomplete
+        searchInput.addEventListener('input', function() {
+            const query = this.value.trim().toLowerCase();
+            
+            if (query.length < 2) {
+                searchSuggestions.style.display = 'none';
+                return;
+            }
+            
+            // Filter locations based on query
+            const filteredLocations = locationDatabase.filter(location => 
+                location.toLowerCase().includes(query)
+            ).slice(0, 5); // Limit to 5 suggestions
+            
+            if (filteredLocations.length > 0) {
+                searchSuggestions.innerHTML = '';
+                
+                filteredLocations.forEach(location => {
+                    const suggestionItem = document.createElement('div');
+                    suggestionItem.className = 'suggestion-item';
+                    suggestionItem.textContent = location;
+                    
+                    suggestionItem.addEventListener('click', () => {
+                        searchInput.value = location;
+                        searchSuggestions.style.display = 'none';
+                        updateWeather(location);
+                        displaySearchResults(location);
+                    });
+                    
+                    searchSuggestions.appendChild(suggestionItem);
+                });
+                
+                searchSuggestions.style.display = 'block';
+            } else {
+                searchSuggestions.style.display = 'none';
+            }
+        });
+
+        // Hide suggestions when clicking outside
+        document.addEventListener('click', function(e) {
+            if (e.target !== searchInput && e.target !== searchSuggestions) {
+                searchSuggestions.style.display = 'none';
+            }
+        });
+
+        searchForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const query = searchInput.value.trim();
+            if (!query) return;
+            
+            // Update current location
+            updateWeather(query);
+            
+            // Show search results
+            displaySearchResults(query);
+            
+            // Hide suggestions
+            searchSuggestions.style.display = 'none';
+        });
+
+        // Functions
+        function showLocationPrompt() {
+            locationPrompt.style.display = 'flex';
+        }
+
+        function getCurrentLocation() {
+            isLoading = true;
+            updateLoadingState();
+            locationBtnText.textContent = 'Detecting Location...';
+            
+            // Check if geolocation is available
+            if (!navigator.geolocation) {
+                alert("Geolocation is not supported by your browser");
+                isLoading = false;
+                updateLoadingState();
+                return;
+            }
+            
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    // In a real app, you would use the coordinates to fetch weather data
+                    // For demo purposes, we'll simulate it
+                    simulateReverseGeocoding(position.coords.latitude, position.coords.longitude);
+                },
+                (error) => {
+                    console.error("Error getting location:", error);
+                    alert("Unable to retrieve your location. Please try again or enter manually.");
+                    isLoading = false;
+                    updateLoadingState();
+                }
+            );
+        }
+
+        function simulateReverseGeocoding(lat, lon) {
+            // Simulate API call delay
+            setTimeout(() => {
+                const randomIndex = Math.floor(Math.random() * locationDatabase.length);
+                const randomLocation = locationDatabase[randomIndex];
+                
+                currentLocation = randomLocation;
+                updateWeather(randomLocation);
+                
+                // Store in localStorage
+                localStorage.setItem('weatherLocation', randomLocation);
+                
+                // If logged in, check for alerts in the new location
+                if (isLoggedIn) {
+                    checkForAlertsInLocation(randomLocation);
+                }
+            }, 1500);
+        }
+
+        function updateWeather(location) {
+            // Simulate weather data
+            const temperature = Math.floor(Math.random() * 15) + 15; // 15-30°C
+            const conditions = ["Sunny", "Partly Cloudy", "Cloudy", "Rainy", "Stormy", "Snowy"];
+            const condition = conditions[Math.floor(Math.random() * conditions.length)];
+            const feelsLikeTemp = temperature + Math.floor(Math.random() * 5) - 2; // +/- 2 degrees
+            const humidityValue = Math.floor(Math.random() * 30) + 50; // 50-80%
+            const windSpeedValue = Math.floor(Math.random() * 15) + 5; // 5-20 km/h
+            const highTempValue = temperature + Math.floor(Math.random() * 5) + 1; // Higher than current
+            const lowTempValue = temperature - Math.floor(Math.random() * 5) - 1; // Lower than current
+            const pressureValue = Math.floor(Math.random() * 30) + 1000; // 1000-1030 hPa
+            const visibilityValue = Math.floor(Math.random() * 5) + 5; // 5-10 km
+            
+            // Store current weather data
+            currentWeatherData = {
+                location: location,
+                temperature: temperature,
+                condition: condition,
+                feelsLike: feelsLikeTemp,
+                humidity: humidityValue,
+                windSpeed: windSpeedValue,
+                highTemp: highTempValue,
+                lowTemp: lowTempValue,
+                pressure: pressureValue,
+                visibility: visibilityValue
+            };
+            
+            // Update DOM
+            locationName.textContent = location;
+            currentTemp.textContent = `${temperature}°C`;
+            currentCondition.textContent = condition;
+            feelsLike.textContent = `Feels like ${feelsLikeTemp}°C`;
+            feelsLikeDetail.textContent = `${feelsLikeTemp}°C`;
+            humidity.textContent = `${humidityValue}%`;
+            windSpeed.textContent = `${windSpeedValue} km/h`;
+            highTemp.textContent = `${highTempValue}°C`;
+            lowTemp.textContent = `${lowTempValue}°C`;
+            pressure.textContent = `${pressureValue} hPa`;
+            visibility.textContent = `${visibilityValue} km`;
+            
+            // Update current date and time
+            updateDateTime();
+            
+            // Update weather condition for animation
+            if (condition.toLowerCase().includes('rain')) {
+                setWeatherCondition('rainy');
+            } else if (condition.toLowerCase().includes('cloud')) {
+                setWeatherCondition('cloudy');
+            } else if (condition.toLowerCase().includes('storm')) {
+                setWeatherCondition('stormy');
+            } else if (condition.toLowerCase().includes('snow')) {
+                setWeatherCondition('snowy');
+            } else {
+                setWeatherCondition('sunny');
+            }
+            
+            // Update Air Quality Index
+            updateAQI();
+            
+            // Generate and update 5-day forecast
+            generateForecastData();
+            updateForecastChart();
+            updateForecastCards();
+            
+            // Update AI health advice
+            updateHealthAdvice();
+            
+            isLoading = false;
+            updateLoadingState();
+            locationBtnText.textContent = "Update My Location";
+            
+            // Add a nice animation to the temperature display
+            currentTemp.classList.add('animate-scale');
+            setTimeout(() => {
+                currentTemp.classList.remove('animate-scale');
+            }, 1000);
+        }
+
+        function updateDateTime() {
+            const now = new Date();
+            const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+            const dateString = now.toLocaleDateString('en-IN', options);
+            const timeString = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+            
+            currentDateTime.textContent = `${dateString} | ${timeString}`;
+        }
+
+        function updateAQI() {
+            // Simulate AQI data
+            const aqiNum = Math.floor(Math.random() * 300) + 20; // 20-320
+            currentAQI = aqiNum; // Store for health advice
+            
+            let level, description, color;
+            
+            if (aqiNum <= 50) {
+                level = "Good";
+                description = "Air quality is satisfactory, and air pollution poses little or no risk.";
+                color = "text-green-600";
+                aqiValue.parentElement.className = "w-24 h-24 rounded-full bg-green-100 flex items-center justify-center mr-4";
+                aqiValue.className = "text-3xl font-bold text-green-600";
+            } else if (aqiNum <= 100) {
+                level = "Moderate";
+                description = "Air quality is acceptable. However, there may be a risk for some people, particularly those who are unusually sensitive to air pollution.";
+                color = "text-yellow-600";
+                aqiValue.parentElement.className = "w-24 h-24 rounded-full bg-yellow-100 flex items-center justify-center mr-4";
+                aqiValue.className = "text-3xl font-bold text-yellow-600";
+            } else if (aqiNum <= 150) {
+                level = "Unhealthy for Sensitive Groups";
+                description = "Members of sensitive groups may experience health effects. The general public is less likely to be affected.";
+                color = "text-orange-600";
+                aqiValue.parentElement.className = "w-24 h-24 rounded-full bg-orange-100 flex items-center justify-center mr-4";
+                aqiValue.className = "text-3xl font-bold text-orange-600";
+            } else if (aqiNum <= 200) {
+                level = "Unhealthy";
+                description = "Some members of the general public may experience health effects; members of sensitive groups may experience more serious health effects.";
+                color = "text-red-600";
+                aqiValue.parentElement.className = "w-24 h-24 rounded-full bg-red-100 flex items-center justify-center mr-4";
+                aqiValue.className = "text-3xl font-bold text-red-600";
+            } else if (aqiNum <= 300) {
+                level = "Very Unhealthy";
+                description = "Health alert: The risk of health effects is increased for everyone.";
+                color = "text-purple-600";
+                aqiValue.parentElement.className = "w-24 h-24 rounded-full bg-purple-100 flex items-center justify-center mr-4";
+                aqiValue.className = "text-3xl font-bold text-purple-600";
+            } else {
+                level = "Hazardous";
+                description = "Health warning of emergency conditions: everyone is more likely to be affected.";
+                color = "text-pink-600";
+                aqiValue.parentElement.className = "w-24 h-24 rounded-full bg-pink-100 flex items-center justify-center mr-4";
+                aqiValue.className = "text-3xl font-bold text-pink-600";
+            }
+            
+            aqiValue.textContent = aqiNum;
+            aqiLevel.textContent = level;
+            aqiLevel.className = `text-lg font-medium ${color}`;
+            aqiDescription.textContent = description;
+            
+            // Update pollutant values
+            pm25.textContent = `${Math.floor(aqiNum * 0.4)} µg/m³`;
+            pm10.textContent = `${Math.floor(aqiNum * 0.8)} µg/m³`;
+            ozone.textContent = `${Math.floor(Math.random() * 100) + 20} µg/m³`;
+            no2.textContent = `${Math.floor(Math.random() * 50) + 5} µg/m³`;
+        }
+
+        function generateForecastData() {
+            // Clear previous forecast data
+            forecastData = [];
+            
+            // Get current date
+            const today = new Date();
+            
+            // Generate forecast for next 5 days
+            for (let i = 1; i <= 5; i++) {
+                const forecastDate = new Date(today);
+                forecastDate.setDate(today.getDate() + i);
+                
+                // Generate random weather data with some correlation to current weather
+                const baseTemp = currentWeatherData.temperature;
+                const randomVariation = Math.floor(Math.random() * 8) - 4; // -4 to +4 degrees variation
+                const highTemp = baseTemp + randomVariation + Math.floor(Math.random() * 3) + 1;
+                const lowTemp = baseTemp + randomVariation - Math.floor(Math.random() * 3) - 1;
+                
+                // Weather conditions with some correlation to current condition
+                const conditions = ["Sunny", "Partly Cloudy", "Cloudy", "Rainy", "Stormy", "Snowy"];
+                let conditionIndex;
+                
+                // Try to make weather patterns somewhat realistic
+                if (i === 1) {
+                    // Day 1 is more likely to be similar to current weather
+                    const currentIndex = conditions.findIndex(c => c === currentWeatherData.condition);
+                    const variation = Math.floor(Math.random() * 3) - 1; // -1, 0, or 1
+                    conditionIndex = Math.max(0, Math.min(conditions.length - 1, currentIndex + variation));
+                } else {
+                    // Subsequent days have more variation but with some continuity
+                    const prevIndex = conditions.findIndex(c => c === forecastData[i-2].condition);
+                    const variation = Math.floor(Math.random() * 5) - 2; // -2 to +2
+                    conditionIndex = Math.max(0, Math.min(conditions.length - 1, prevIndex + variation));
+                }
+                
+                const condition = conditions[conditionIndex];
+                
+                // Format date as day of week
+                const dayOfWeek = forecastDate.toLocaleDateString('en-US', { weekday: 'short' });
+                const fullDate = forecastDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                
+                forecastData.push({
+                    date: forecastDate,
+                    dayOfWeek: dayOfWeek,
+                    fullDate: fullDate,
+                    highTemp: highTemp,
+                    lowTemp: lowTemp,
+                    condition: condition
+                });
+            }
+        }
+
+        function updateForecastChart() {
+            // Clear previous chart
+            forecastBars.innerHTML = '';
+            
+            if (forecastData.length === 0) {
+                return;
+            }
+            
+            // Find min and max for scaling
+            const highTemps = forecastData.map(day => day.highTemp);
+            const minTemp = Math.min(...highTemps) - 2;
+            const maxTemp = Math.max(...highTemps) + 2;
+            const range = maxTemp - minTemp;
+            
+            // Create bars
+            forecastData.forEach((day, i) => {
+                const temp = day.highTemp;
+                const height = ((temp - minTemp) / range) * 150; // Scale to 150px max height
+                
+                const barContainer = document.createElement('div');
+                barContainer.className = 'relative flex-1 flex justify-center';
+                
+                const bar = document.createElement('div');
+                bar.className = 'chart-bar';
+                bar.style.height = `${height}px`;
+                
+                const tempLabel = document.createElement('div');
+                tempLabel.className = 'chart-temp';
+                tempLabel.textContent = `${temp}°C`;
+                
+                const dayLabel = document.createElement('div');
+                dayLabel.className = 'chart-label';
+                dayLabel.textContent = day.dayOfWeek;
+                
+                barContainer.appendChild(bar);
+                barContainer.appendChild(tempLabel);
+                barContainer.appendChild(dayLabel);
+                
+                forecastBars.appendChild(barContainer);
+            });
+        }
+
+        function updateForecastCards() {
+            // Clear previous cards
+            forecastCards.innerHTML = '';
+            
+            if (forecastData.length === 0) {
+                return;
+            }
+            
+            // Create cards for each forecast day
+            forecastData.forEach(day => {
+                const card = document.createElement('div');
+                card.className = 'weather-detail-card p-3 text-center';
+                
+                // Get appropriate weather icon
+                let weatherIcon = weatherIcons['Sunny']; // Default
+                if (weatherIcons[day.condition]) {
+                    weatherIcon = weatherIcons[day.condition];
+                }
+                
+                card.innerHTML = `
+                    <p class="text-sm font-medium">${day.dayOfWeek}</p>
+                    <p class="text-xs text-gray-500">${day.fullDate}</p>
+                    <div class="my-2">
+                        ${weatherIcon}
+                    </div>
+                    <p class="text-sm">${day.highTemp}°C / ${day.lowTemp}°C</p>
+                `;
+                
+                forecastCards.appendChild(card);
+            });
+        }
+
+        function updateHealthAdvice() {
+            // Determine the appropriate health advice based on weather and air quality
+            let adviceType = 'moderate';
+            let adviceList = [];
+            
+            // Check temperature
+            if (currentWeatherData.temperature > 30) {
+                adviceType = 'hot';
+            } else if (currentWeatherData.temperature < 15) {
+                adviceType = 'cold';
+            }
+            
+            // Check weather condition
+            if (currentWeatherData.condition.toLowerCase().includes('rain') || 
+                currentWeatherData.condition.toLowerCase().includes('storm')) {
+                adviceType = 'rainy';
+            }
+            
+            // Check air quality
+            if (currentAQI > 150) {
+                adviceType = 'poorAirQuality';
+            }
+            
+            // Get advice based on determined type
+            adviceList = healthAdvice[adviceType];
+            
+            // Create HTML for advice
+            let adviceHTML = `
+                <div class="flex items-center mb-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p class="font-medium">Health Recommendations for Today</p>
+                </div>
+                <ul class="space-y-2">
+            `;
+            
+            adviceList.forEach(advice => {
+                adviceHTML += `
+                    <li class="flex items-start">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white mr-2 flex-shrink-0 mt-0.5
